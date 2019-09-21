@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, AsyncStorage, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Keyboard } from 'react-native';
 import { Actions } from 'react-native-router-flux';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class Form extends Component {
     constructor(props) {
@@ -23,8 +24,7 @@ export default class Form extends Component {
             AsyncStorage.setItem('loginDetails', JSON.stringify(loginDetails));
 
             Keyboard.dismiss();
-            alert("You successfully registered. Email: " + email + ' password: ' + password);
-            this.login();
+            alert("You successfully registered. Email: " + email);
         } else if (this.props.type == 'Login') {
             try {
                 let loginDetails = await AsyncStorage.getItem('loginDetails');
@@ -32,10 +32,8 @@ export default class Form extends Component {
 
                 if (ld.email != null && ld.password != null) {
                     if (ld.email == email && ld.password == password) {
-                        // alert('Go in!');
                         Actions.cities();
-                    }
-                    else {
+                    } else {
                         alert('Email and Password does not exist!');
                     }
                 }
@@ -44,12 +42,6 @@ export default class Form extends Component {
                 alert(error);
             }
         }
-    }
-
-    showData = async () => {
-        let loginDetails = await AsyncStorage.getItem('loginDetails');
-        let ld = JSON.parse(loginDetails);
-        alert('email: ' + ld.email + ' ' + 'password: ' + ld.password);
     }
 
     render() {
