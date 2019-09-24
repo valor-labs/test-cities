@@ -121,15 +121,6 @@ export default function Cities() {
         }
     }, [isDataLoaded, page]);
 
-
-    if (!isDataLoaded) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.title}>Loading Cities...</Text>
-            </View>
-        );
-    }
-
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Page {!page ? '1' : page} of {Math.ceil(count / 9)}  |  Cities [{count}]</Text>
@@ -138,21 +129,29 @@ export default function Cities() {
                     <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
                         <Row data={tableHead} widthArr={widthArr} style={styles.header} textStyle={styles.text} />
                     </Table>
-                    <ScrollView style={styles.dataWrapper}>
-                        <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
-                            {
-                                tableData.map((rowData, index) => (
-                                    <Row
-                                        key={index}
-                                        data={rowData}
-                                        widthArr={widthArr}
-                                        style={[styles.row, index % 2 && { backgroundColor: '#F7F6E7' }]}
-                                        textStyle={styles.text}
-                                    />
-                                ))
-                            }
-                        </Table>
-                    </ScrollView>
+                    {
+                        !isDataLoaded ? (
+                            <View style={styles.container}>
+                                <Text style={styles.title}>Loading Cities...</Text>
+                            </View>
+                        ) : (
+                                <ScrollView style={styles.dataWrapper}>
+                                    <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
+                                        {
+                                            tableData.map((rowData, index) => (
+                                                <Row
+                                                    key={index}
+                                                    data={rowData}
+                                                    widthArr={widthArr}
+                                                    style={[styles.row, index % 2 && { backgroundColor: '#F7F6E7' }]}
+                                                    textStyle={styles.text}
+                                                />
+                                            ))
+                                        }
+                                    </Table>
+                                </ScrollView>
+                            )
+                    }
                 </View>
             </ScrollView>
             {pageIncView(nextPage === null)}
