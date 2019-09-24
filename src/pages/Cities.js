@@ -1,8 +1,8 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, BackHandler } from 'react-native';
-import { Actions } from 'react-native-router-flux';
+import { StyleSheet, Text, View, Alert, ScrollView, BackHandler } from 'react-native';
 import { Table, Row } from 'react-native-table-component';
+import { handleBackButton, back, pageIncView, pageDecView } from './CitiesUtils';
 
 /*
 todo refactor this code in the future:
@@ -41,16 +41,6 @@ export default function Cities() {
     [tableHead] = useState(['name', 'longitude', 'latitude', 'country']);
     [widthArr] = useState([120, 90, 90, 60]);
 
-    const handleBackButton = () => true;
-    const back = () => {
-        return (
-            <TouchableOpacity onPress={() => Actions.pop()}>
-                <View style={styles.backBtn}>
-                    <Text style={styles.btnText}>back to Login...</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    }
     const pageInc = () => {
         setDataLoaded(false);
         if (page === '') {
@@ -65,38 +55,6 @@ export default function Cities() {
             setPage(+page - 1);
         }
     };
-    const pageIncView = (disabled) => {
-        if (disabled) {
-            return (
-                <View style={styles.backBtnInactive}>
-                    <Text style={styles.btnText}>page forward &gt;&gt;</Text>
-                </View>
-            );
-        }
-        return (
-            <TouchableOpacity onPress={pageInc}>
-                <View style={styles.backBtn}>
-                    <Text style={styles.btnText}>page forward &gt;&gt;</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    }
-    const pageDecView = (disabled) => {
-        if (disabled) {
-            return (
-                <View style={styles.backBtnInactive}>
-                    <Text style={styles.btnText}>&lt;&lt;page backward</Text>
-                </View>
-            );
-        }
-        return (
-            <TouchableOpacity onPress={pageDec}>
-                <View style={styles.backBtn}>
-                    <Text style={styles.btnText}>&lt;&lt;page backward</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    }
 
     let _isMounted = true;
 
@@ -154,8 +112,8 @@ export default function Cities() {
                     }
                 </View>
             </ScrollView>
-            {pageIncView(nextPage === null)}
-            {pageDecView(previousPage === null)}
+            {pageIncView(pageInc, nextPage === null)}
+            {pageDecView(pageDec, previousPage === null)}
             {back()}
         </View>
     )
@@ -167,7 +125,5 @@ const styles = StyleSheet.create({
     header: { height: 50, backgroundColor: '#537791' },
     text: { textAlign: 'center', fontWeight: '100' },
     dataWrapper: { marginTop: -1 },
-    row: { height: 40, backgroundColor: '#E7E6E1' },
-    backBtn: { fontSize: 18, marginTop: 15, backgroundColor: '#78B7BB', borderRadius: 2, padding: 10, fontSize: 18 },
-    backBtnInactive: { fontSize: 18, marginTop: 15, backgroundColor: '#eeeeee', borderRadius: 2, padding: 10, fontSize: 18 }
+    row: { height: 40, backgroundColor: '#E7E6E1' }
 });
