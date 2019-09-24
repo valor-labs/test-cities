@@ -4,12 +4,21 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, BackHandle
 import { Actions } from 'react-native-router-flux';
 import { Table, Row } from 'react-native-table-component';
 
-const fetchData = () => {
+/*
+todo refactor this code in the future:
+1. https://humanitarianbooking.external-api.org/v1/cities/ is a start URL
+2. get URLs for previous and next from related sections of the response
+3. get api and user key from 'real' authorization functionality
+*/
+const fetchData = (page) => {
+    const pageSuffix = !!page ? `?page=${page}` : '';
     const options = {
         method: 'get',
-        url: 'https://humanitarianbooking.external-api.org/v1/cities/',
+        url: `https://humanitarianbooking.external-api.org/v1/cities/${pageSuffix}`,
         headers: {
+            // todo: put api key here
             'x-api-key': '',
+            // todo: put user key here
             'Authorization': 'Token ',
             'Accept-Encoding': 'identity'
         }
@@ -25,10 +34,12 @@ const fetchData = () => {
 export default function Cities() {
     [isDataLoaded, setDataLoaded] = useState(false);
     [count, setCount] = useState(null);
+    [previousPage, setPreviousPage] = useState(null);
+    [nextPage, setNextPage] = useState(null);
+    [page, setPage] = useState('');
     [tableData, setTableData] = useState([]);
     [tableHead] = useState(['name', 'longitude', 'latitude', 'country']);
     [widthArr] = useState([120, 90, 90, 60]);
-    [page, setPage] = useState(1);
 
     const handleBackButton = () => true;
     const back = () => {
@@ -40,6 +51,52 @@ export default function Cities() {
             </TouchableOpacity>
         );
     }
+    const pageInc = () => {
+        setDataLoaded(false);
+        if (page === '') {
+            setPage('2');
+        } else {
+            setPage(+page + 1);
+        }
+    };
+    const pageDec = () => {
+        if (page !== '') {
+            setDataLoaded(false);
+            setPage(+page - 1);
+        }
+    };
+    const pageIncView = (disabled) => {
+        if (disabled) {
+            return (
+                <View style={styles.backBtnInactive}>
+                    <Text style={styles.btnText}>page forward &gt;&gt;</Text>
+                </View>
+            );
+        }
+        return (
+            <TouchableOpacity onPress={pageInc}>
+                <View style={styles.backBtn}>
+                    <Text style={styles.btnText}>page forward &gt;&gt;</Text>
+                </View>
+            </TouchableOpacity>
+        );
+    }
+    const pageDecView = (disabled) => {
+        if (disabled) {
+            return (
+                <View style={styles.backBtnInactive}>
+                    <Text style={styles.btnText}>&lt;&lt;page backward</Text>
+                </View>
+            );
+        }
+        return (
+            <TouchableOpacity onPress={pageDec}>
+                <View style={styles.backBtn}>
+                    <Text style={styles.btnText}>&lt;&lt;page backward</Text>
+                </View>
+            </TouchableOpacity>
+        );
+    }
 
     let _isMounted = true;
 
@@ -47,15 +104,11 @@ export default function Cities() {
         if (_isMounted) {
             BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-            fetchData().then(content => {
-                const _tableData = [];
-
-                for (const record of content.results) {
-                    _tableData.push([record.name, record.longitude, record.latitude, record.country]);
-                }
-
+            fetchData(page).then(content => {
                 setCount(content.count);
-                setTableData(_tableData);
+                setPreviousPage(content.previous);
+                setNextPage(content.next);
+                setTableData(content.results.map(record => [record.name, record.longitude, record.latitude, record.country]));
                 setDataLoaded(true);
             }).catch(e => {
                 Alert.alert(`Error during data reading: ${e.message}`);
@@ -66,7 +119,7 @@ export default function Cities() {
             BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
             _isMounted = false;
         }
-    }, [_isMounted]);
+    }, [isDataLoaded, page]);
 
 
     if (!isDataLoaded) {
@@ -79,7 +132,7 @@ export default function Cities() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Cities [{count}]</Text>
+            <Text style={styles.title}>Page {!page ? '1' : page} of {Math.ceil(count / 9)}  |  Cities [{count}]</Text>
             <ScrollView horizontal={true}>
                 <View>
                     <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
@@ -102,6 +155,8 @@ export default function Cities() {
                     </ScrollView>
                 </View>
             </ScrollView>
+            {pageIncView(nextPage === null)}
+            {pageDecView(previousPage === null)}
             {back()}
         </View>
     )
@@ -114,5 +169,6 @@ const styles = StyleSheet.create({
     text: { textAlign: 'center', fontWeight: '100' },
     dataWrapper: { marginTop: -1 },
     row: { height: 40, backgroundColor: '#E7E6E1' },
-    backBtn: { fontSize: 18, marginTop: 15, backgroundColor: '#78B7BB', borderRadius: 2, padding: 10, fontSize: 18 }
+    backBtn: { fontSize: 18, marginTop: 15, backgroundColor: '#78B7BB', borderRadius: 2, padding: 10, fontSize: 18 },
+    backBtnInactive: { fontSize: 18, marginTop: 15, backgroundColor: '#eeeeee', borderRadius: 2, padding: 10, fontSize: 18 }
 });
