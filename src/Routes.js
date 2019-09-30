@@ -15,7 +15,7 @@ export default class Routes extends Component {
                 <Stack key="root">
                     <Scene key="login" component={Login} title="Login" initial />
                     <Scene key="signup" component={Signup} title="Sign up" />
-                    <Scene key="cities" component={Cities} title="Cities" panHandlers={null} hideNavBar />
+                    <Scene key="cities" component={Cities} title="Cities" />
                 </Stack>
             </Router>
         )

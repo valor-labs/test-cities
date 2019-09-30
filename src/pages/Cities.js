@@ -60,8 +60,6 @@ export default function Cities() {
 
     useEffect(() => {
         if (_isMounted) {
-            BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
             fetchData(page).then(content => {
                 setCount(content.count);
                 setPreviousPage(content.previous);
@@ -74,7 +72,6 @@ export default function Cities() {
         }
 
         return function () {
-            BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
             _isMounted = false;
         }
     }, [isDataLoaded, page]);
@@ -114,7 +111,6 @@ export default function Cities() {
             </ScrollView>
             {pageIncView(pageInc, nextPage === null)}
             {pageDecView(pageDec, previousPage === null)}
-            {back()}
         </View>
     )
 }
